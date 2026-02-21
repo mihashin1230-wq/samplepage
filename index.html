@@ -14,6 +14,7 @@
     <!-- Tailwind 환경 설정 -->
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -27,68 +28,70 @@
             }
         }
     </script>
+    <!-- 다크모드 초기 설정 (FOUC 방지) -->
+    <script>
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
     <style>
         body { 
             font-family: 'Noto Sans KR', sans-serif; 
-            background-color: #F8FAFC; 
         }
         /* 카드 호버 애니메이션 */
         .card-hover:hover { 
             transform: translateY(-6px); 
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
         }
-        /* 태그 스타일 */
-        .tag { 
-            font-size: 0.75rem; 
-            padding: 0.25rem 0.6rem; 
-            border-radius: 9999px; 
-            background-color: #EEF2FF; 
-            color: #4F46E5; 
-            font-weight: 500;
-        }
     </style>
 </head>
-<body class="text-gray-800 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased min-h-screen flex flex-col transition-colors duration-300">
     <!-- 네비게이션 바 -->
-    <nav class="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100 sticky top-0 z-50 transition-all">
+    <nav class="bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm border-b border-gray-100 dark:border-gray-800 sticky top-0 z-50 transition-all">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16 items-center">
                 <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
                     <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center text-white">
                         <i class="fa-solid fa-robot text-sm"></i>
                     </div>
-                    <span class="font-bold text-xl tracking-tight text-gray-900">AI Hub.</span>
+                    <span class="font-bold text-xl tracking-tight text-gray-900 dark:text-white">AI Hub.</span>
                 </div>
+                <!-- 다크모드 토글 버튼 -->
+                <button id="theme-toggle" class="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 transition-colors focus:outline-none w-10 h-10 flex items-center justify-center">
+                    <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+                </button>
             </div>
         </div>
     </nav>
 
     <!-- 히어로(Hero) 섹션 -->
-    <header class="bg-white py-16 sm:py-24 border-b border-gray-100">
+    <header class="bg-white dark:bg-gray-900 py-16 sm:py-24 border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-primary text-sm font-medium mb-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-primary dark:text-indigo-400 text-sm font-medium mb-6">
                 <span class="flex h-2 w-2 relative">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary dark:bg-indigo-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-primary dark:bg-indigo-400"></span>
                 </span>
                 2026년 최신 AI 트렌드 업데이트
             </div>
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 mb-6 tracking-tight">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white mb-6 tracking-tight transition-colors duration-300">
                 세상을 바꾸는 <br class="hidden sm:block"/>
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">AI 도구 모음</span>
             </h1>
-            <p class="mt-4 text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+            <p class="mt-4 text-lg sm:text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed transition-colors duration-300">
                 작업 속도를 높이고 창의력을 확장해 줄 필수 인공지능 서비스들을 한 곳에서 확인하고 바로 접속해보세요.
             </p>
             
             <!-- 필터 버튼 영역 -->
             <div class="flex flex-wrap justify-center gap-3 mt-8" id="filter-container">
-                <button data-filter="all" class="filter-btn active px-5 py-2.5 rounded-full text-sm font-semibold bg-primary text-white shadow-md shadow-indigo-200 transition-all">🌟 전체보기</button>
-                <button data-filter="text" class="filter-btn px-5 py-2.5 rounded-full text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-gray-900 transition-all">💬 대화/텍스트</button>
-                <button data-filter="image" class="filter-btn px-5 py-2.5 rounded-full text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-gray-900 transition-all">🎨 이미지 생성</button>
-                <button data-filter="video" class="filter-btn px-5 py-2.5 rounded-full text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-gray-900 transition-all">🎬 비디오/음성</button>
-                <button data-filter="dev" class="filter-btn px-5 py-2.5 rounded-full text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-gray-900 transition-all">💻 개발/코딩</button>
-                <button data-filter="prod" class="filter-btn px-5 py-2.5 rounded-full text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-gray-900 transition-all">🚀 업무/생산성</button>
+                <button data-filter="all" class="filter-btn active px-5 py-2.5 rounded-full text-sm font-semibold bg-primary text-white shadow-md shadow-indigo-200 dark:shadow-indigo-900/20 transition-all">🌟 전체보기</button>
+                <button data-filter="text" class="filter-btn px-5 py-2.5 rounded-full text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-gray-900 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-white transition-all">💬 대화/텍스트</button>
+                <button data-filter="image" class="filter-btn px-5 py-2.5 rounded-full text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-gray-900 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-white transition-all">🎨 이미지 생성</button>
+                <button data-filter="video" class="filter-btn px-5 py-2.5 rounded-full text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-gray-900 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-white transition-all">🎬 비디오/음성</button>
+                <button data-filter="dev" class="filter-btn px-5 py-2.5 rounded-full text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-gray-900 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-white transition-all">💻 개발/코딩</button>
+                <button data-filter="prod" class="filter-btn px-5 py-2.5 rounded-full text-sm font-medium bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 hover:text-gray-900 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-700 dark:hover:text-white transition-all">🚀 업무/생산성</button>
             </div>
         </div>
     </header>
@@ -102,24 +105,24 @@
         
         <!-- 검색/필터 결과가 없을 때 표시되는 화면 -->
         <div id="empty-state" class="hidden text-center py-20">
-            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fa-regular fa-folder-open text-3xl text-gray-400"></i>
+            <div class="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
+                <i class="fa-regular fa-folder-open text-3xl text-gray-400 dark:text-gray-500"></i>
             </div>
-            <h3 class="text-lg font-bold text-gray-900">해당하는 카테고리의 도구가 없습니다.</h3>
-            <p class="text-gray-500 mt-2">다른 카테고리를 선택해 보세요.</p>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white">해당하는 카테고리의 도구가 없습니다.</h3>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">다른 카테고리를 선택해 보세요.</p>
         </div>
     </main>
 
     <!-- 푸터 -->
-    <footer class="bg-white border-t border-gray-200 py-10 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
+    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 py-10 mt-auto transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
             <div>
                 <p>&copy; 2026 AI Hub. All rights reserved.</p>
             </div>
             <div class="flex gap-4">
-                <a href="#" class="hover:text-primary transition-colors">이용약관</a>
-                <a href="#" class="hover:text-primary transition-colors">개인정보처리방침</a>
-                <a href="#" class="hover:text-primary transition-colors">도구 추천하기</a>
+                <a href="#" class="hover:text-primary dark:hover:text-indigo-400 transition-colors">이용약관</a>
+                <a href="#" class="hover:text-primary dark:hover:text-indigo-400 transition-colors">개인정보처리방침</a>
+                <a href="#" class="hover:text-primary dark:hover:text-indigo-400 transition-colors">도구 추천하기</a>
             </div>
         </div>
     </footer>
@@ -129,36 +132,61 @@
         // AI 도구 데이터베이스
         const tools = [
             // 텍스트/대화
-            { name: "ChatGPT", desc: "OpenAI의 가장 강력한 대화형 AI. 다양한 언어 번역, 코딩 보조, 복잡한 문서 분석에 탁월합니다.", category: "text", url: "https://chatgpt.com", icon: "fa-solid fa-comment-dots", color: "text-green-600", bg: "bg-green-100", tags: ["LLM", "범용", "GPT-4o"] },
-            { name: "Claude", desc: "Anthropic의 AI 모델. 매우 긴 문맥을 이해하고, 가장 자연스럽고 윤리적인 글쓰기를 지원합니다.", category: "text", url: "https://claude.ai", icon: "fa-solid fa-brain", color: "text-amber-600", bg: "bg-amber-100", tags: ["글쓰기", "코딩", "안전성"] },
-            { name: "Gemini", desc: "Google의 멀티모달 AI. 텍스트는 물론 이미지, 비디오, 음성을 동시에 분석하고 구글 생태계와 연동됩니다.", category: "text", url: "https://gemini.google.com", icon: "fa-brands fa-google", color: "text-blue-600", bg: "bg-blue-100", tags: ["멀티모달", "구글연동"] },
-            { name: "Perplexity", desc: "실시간 웹 검색을 기반으로 정확한 출처를 제시하는 AI 검색 엔진. 논문 검색이나 리서치에 최적화되어 있습니다.", category: "text", url: "https://www.perplexity.ai", icon: "fa-solid fa-magnifying-glass", color: "text-cyan-600", bg: "bg-cyan-100", tags: ["검색엔진", "리서치"] },
+            { name: "ChatGPT", desc: "OpenAI의 가장 강력한 대화형 AI. 다양한 언어 번역, 코딩 보조, 복잡한 문서 분석에 탁월합니다.", category: "text", url: "https://chatgpt.com", icon: "fa-solid fa-comment-dots", color: "text-green-600 dark:text-green-400", bg: "bg-green-100 dark:bg-green-900/30", tags: ["LLM", "범용", "GPT-4o"] },
+            { name: "Claude", desc: "Anthropic의 AI 모델. 매우 긴 문맥을 이해하고, 가장 자연스럽고 윤리적인 글쓰기를 지원합니다.", category: "text", url: "https://claude.ai", icon: "fa-solid fa-brain", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-100 dark:bg-amber-900/30", tags: ["글쓰기", "코딩", "안전성"] },
+            { name: "Gemini", desc: "Google의 멀티모달 AI. 텍스트는 물론 이미지, 비디오, 음성을 동시에 분석하고 구글 생태계와 연동됩니다.", category: "text", url: "https://gemini.google.com", icon: "fa-brands fa-google", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-100 dark:bg-blue-900/30", tags: ["멀티모달", "구글연동"] },
+            { name: "Perplexity", desc: "실시간 웹 검색을 기반으로 정확한 출처를 제시하는 AI 검색 엔진. 논문 검색이나 리서치에 최적화되어 있습니다.", category: "text", url: "https://www.perplexity.ai", icon: "fa-solid fa-magnifying-glass", color: "text-cyan-600 dark:text-cyan-400", bg: "bg-cyan-100 dark:bg-cyan-900/30", tags: ["검색엔진", "리서치"] },
             
             // 이미지 생성
-            { name: "Midjourney", desc: "디스코드 기반의 이미지 생성 AI. 가장 압도적이고 예술적인 고퀄리티 이미지를 만들어냅니다.", category: "image", url: "https://www.midjourney.com", icon: "fa-solid fa-palette", color: "text-purple-600", bg: "bg-purple-100", tags: ["고품질", "디스코드"] },
-            { name: "DALL-E 3", desc: "ChatGPT 내에서 바로 사용 가능한 이미지 생성기. 사용자의 프롬프트 의도를 가장 정확하게 반영합니다.", category: "image", url: "https://openai.com/dall-e-3", icon: "fa-regular fa-image", color: "text-indigo-500", bg: "bg-indigo-100", tags: ["정확도", "쉬운사용"] },
-            { name: "Leonardo.ai", desc: "다양한 모델과 세밀한 제어(ControlNet 등) 기능을 제공하는 플랫폼. 게임 에셋이나 일러스트 제작에 유용합니다.", category: "image", url: "https://leonardo.ai", icon: "fa-solid fa-pen-nib", color: "text-pink-600", bg: "bg-pink-100", tags: ["다양한모델", "무료크레딧"] },
+            { name: "Midjourney", desc: "디스코드 기반의 이미지 생성 AI. 가장 압도적이고 예술적인 고퀄리티 이미지를 만들어냅니다.", category: "image", url: "https://www.midjourney.com", icon: "fa-solid fa-palette", color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-100 dark:bg-purple-900/30", tags: ["고품질", "디스코드"] },
+            { name: "DALL-E 3", desc: "ChatGPT 내에서 바로 사용 가능한 이미지 생성기. 사용자의 프롬프트 의도를 가장 정확하게 반영합니다.", category: "image", url: "https://openai.com/dall-e-3", icon: "fa-regular fa-image", color: "text-indigo-500 dark:text-indigo-400", bg: "bg-indigo-100 dark:bg-indigo-900/30", tags: ["정확도", "쉬운사용"] },
+            { name: "Leonardo.ai", desc: "다양한 모델과 세밀한 제어(ControlNet 등) 기능을 제공하는 플랫폼. 게임 에셋이나 일러스트 제작에 유용합니다.", category: "image", url: "https://leonardo.ai", icon: "fa-solid fa-pen-nib", color: "text-pink-600 dark:text-pink-400", bg: "bg-pink-100 dark:bg-pink-900/30", tags: ["다양한모델", "무료크레딧"] },
             
             // 비디오/음성
-            { name: "Runway", desc: "텍스트나 이미지만으로 고퀄리티의 짧은 비디오를 생성하고 편집할 수 있는 대표적인 생성형 비디오 툴입니다.", category: "video", url: "https://runwayml.com", icon: "fa-solid fa-video", color: "text-slate-800", bg: "bg-slate-200", tags: ["Gen-2", "비디오생성"] },
-            { name: "Suno AI", desc: "원하는 장르와 주제를 텍스트로 입력하면, 보컬과 악기 반주가 모두 포함된 완전한 음악을 작곡해 줍니다.", category: "video", url: "https://suno.com", icon: "fa-solid fa-music", color: "text-yellow-600", bg: "bg-yellow-100", tags: ["음악생성", "작곡"] },
-            { name: "ElevenLabs", desc: "자연스러운 호흡과 감정까지 살려내는 세계 최고 수준의 AI 음성 합성(TTS) 및 목소리 복제 서비스입니다.", category: "video", url: "https://elevenlabs.io", icon: "fa-solid fa-microphone-lines", color: "text-red-500", bg: "bg-red-100", tags: ["TTS", "음성복제"] },
+            { name: "Runway", desc: "텍스트나 이미지만으로 고퀄리티의 짧은 비디오를 생성하고 편집할 수 있는 대표적인 생성형 비디오 툴입니다.", category: "video", url: "https://runwayml.com", icon: "fa-solid fa-video", color: "text-slate-800 dark:text-slate-300", bg: "bg-slate-200 dark:bg-slate-700", tags: ["Gen-2", "비디오생성"] },
+            { name: "Suno AI", desc: "원하는 장르와 주제를 텍스트로 입력하면, 보컬과 악기 반주가 모두 포함된 완전한 음악을 작곡해 줍니다.", category: "video", url: "https://suno.com", icon: "fa-solid fa-music", color: "text-yellow-600 dark:text-yellow-400", bg: "bg-yellow-100 dark:bg-yellow-900/30", tags: ["음악생성", "작곡"] },
+            { name: "ElevenLabs", desc: "자연스러운 호흡과 감정까지 살려내는 세계 최고 수준의 AI 음성 합성(TTS) 및 목소리 복제 서비스입니다.", category: "video", url: "https://elevenlabs.io", icon: "fa-solid fa-microphone-lines", color: "text-red-500 dark:text-red-400", bg: "bg-red-100 dark:bg-red-900/30", tags: ["TTS", "음성복제"] },
             
             // 개발/코딩
-            { name: "GitHub Copilot", desc: "VS Code 등 에디터에 통합되어 주석이나 문맥을 파악해 코드를 자동 완성해주는 AI 페어 프로그래머입니다.", category: "dev", url: "https://github.com/features/copilot", icon: "fa-brands fa-github-alt", color: "text-gray-900", bg: "bg-gray-200", tags: ["코드완성", "유료"] },
-            { name: "Cursor", desc: "AI가 내장된 차세대 코드 에디터. 파일 전체의 문맥을 이해하고 자연어로 코드를 수정하거나 작성할 수 있습니다.", category: "dev", url: "https://cursor.sh", icon: "fa-solid fa-terminal", color: "text-blue-500", bg: "bg-blue-100", tags: ["에디터", "생산성끝판왕"] },
-            { name: "v0 by Vercel", desc: "자연어 프롬프트를 입력하면 즉시 복사해서 사용할 수 있는 React/Tailwind 기반의 아름다운 UI 코드를 짜줍니다.", category: "dev", url: "https://v0.dev", icon: "fa-solid fa-code", color: "text-black", bg: "bg-gray-200", tags: ["UI생성", "프론트엔드"] },
+            { name: "GitHub Copilot", desc: "VS Code 등 에디터에 통합되어 주석이나 문맥을 파악해 코드를 자동 완성해주는 AI 페어 프로그래머입니다.", category: "dev", url: "https://github.com/features/copilot", icon: "fa-brands fa-github-alt", color: "text-gray-900 dark:text-white", bg: "bg-gray-200 dark:bg-gray-700", tags: ["코드완성", "유료"] },
+            { name: "Cursor", desc: "AI가 내장된 차세대 코드 에디터. 파일 전체의 문맥을 이해하고 자연어로 코드를 수정하거나 작성할 수 있습니다.", category: "dev", url: "https://cursor.sh", icon: "fa-solid fa-terminal", color: "text-blue-500 dark:text-blue-400", bg: "bg-blue-100 dark:bg-blue-900/30", tags: ["에디터", "생산성끝판왕"] },
+            { name: "v0 by Vercel", desc: "자연어 프롬프트를 입력하면 즉시 복사해서 사용할 수 있는 React/Tailwind 기반의 아름다운 UI 코드를 짜줍니다.", category: "dev", url: "https://v0.dev", icon: "fa-solid fa-code", color: "text-black dark:text-white", bg: "bg-gray-200 dark:bg-gray-700", tags: ["UI생성", "프론트엔드"] },
             
             // 생산성
-            { name: "Notion AI", desc: "노션 문서 내에서 글쓰기, 내용 요약, 번역, 브레인스토밍, 데이터 분석 등을 도와주는 내장형 AI입니다.", category: "prod", url: "https://www.notion.so/product/ai", icon: "fa-solid fa-book-open", color: "text-slate-700", bg: "bg-slate-200", tags: ["문서작성", "요약"] },
-            { name: "Gamma", desc: "간단한 주제 텍스트나 개요만 입력하면 디자인이 완성된 프레젠테이션, 웹페이지, 문서를 순식간에 만듭니다.", category: "prod", url: "https://gamma.app", icon: "fa-solid fa-presentation-screen", color: "text-fuchsia-600", bg: "bg-fuchsia-100", tags: ["PPT", "발표자료"] },
-            { name: "Canva Magic Studio", desc: "디자인 초보자도 전문가처럼 작업하게 해주는 캔버스의 AI 기능. 이미지 생성, 배경 제거, 디자인 변형을 지원합니다.", category: "prod", url: "https://www.canva.com/magic", icon: "fa-solid fa-wand-magic-sparkles", color: "text-teal-600", bg: "bg-teal-100", tags: ["디자인", "편의성"] }
+            { name: "Notion AI", desc: "노션 문서 내에서 글쓰기, 내용 요약, 번역, 브레인스토밍, 데이터 분석 등을 도와주는 내장형 AI입니다.", category: "prod", url: "https://www.notion.so/product/ai", icon: "fa-solid fa-book-open", color: "text-slate-700 dark:text-slate-300", bg: "bg-slate-200 dark:bg-slate-700", tags: ["문서작성", "요약"] },
+            { name: "Gamma", desc: "간단한 주제 텍스트나 개요만 입력하면 디자인이 완성된 프레젠테이션, 웹페이지, 문서를 순식간에 만듭니다.", category: "prod", url: "https://gamma.app", icon: "fa-solid fa-presentation-screen", color: "text-fuchsia-600 dark:text-fuchsia-400", bg: "bg-fuchsia-100 dark:bg-fuchsia-900/30", tags: ["PPT", "발표자료"] },
+            { name: "Canva Magic Studio", desc: "디자인 초보자도 전문가처럼 작업하게 해주는 캔버스의 AI 기능. 이미지 생성, 배경 제거, 디자인 변형을 지원합니다.", category: "prod", url: "https://www.canva.com/magic", icon: "fa-solid fa-wand-magic-sparkles", color: "text-teal-600 dark:text-teal-400", bg: "bg-teal-100 dark:bg-teal-900/30", tags: ["디자인", "편의성"] }
         ];
 
         // DOM 요소 선택
         const toolsGrid = document.getElementById('tools-grid');
         const filterBtns = document.querySelectorAll('.filter-btn');
         const emptyState = document.getElementById('empty-state');
+        
+        // 다크모드 관련 요소
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+
+        // 다크모드 초기 아이콘 설정
+        if (document.documentElement.classList.contains('dark')) {
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        }
+
+        // 다크모드 토글 이벤트
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                localStorage.setItem('theme', 'light');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+        });
 
         // 카드 렌더링 함수
         function renderTools(filter = 'all') {
@@ -179,25 +207,25 @@
                 
                 // HTML 카드 동적 생성
                 filteredTools.forEach(tool => {
-                    const tagsHtml = tool.tags.map(tag => `<span class="tag">#${tag}</span>`).join('');
+                    const tagsHtml = tool.tags.map(tag => `<span class="text-xs py-1 px-2.5 rounded-full font-medium bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">#${tag}</span>`).join('');
                     
                     const card = document.createElement('div');
-                    card.className = 'bg-white rounded-2xl p-6 border border-gray-100 shadow-sm card-hover transition-all duration-300 flex flex-col h-full group';
+                    card.className = 'bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-100 dark:border-gray-700 shadow-sm card-hover transition-all duration-300 flex flex-col h-full group';
                     card.innerHTML = `
                         <div class="flex items-start justify-between mb-5">
-                            <div class="w-14 h-14 rounded-xl flex items-center justify-center ${tool.bg} ${tool.color} text-2xl">
+                            <div class="w-14 h-14 rounded-xl flex items-center justify-center ${tool.bg} ${tool.color} text-2xl transition-colors">
                                 <i class="${tool.icon}"></i>
                             </div>
-                            <a href="${tool.url}" target="_blank" rel="noopener noreferrer" title="새 탭에서 열기" class="text-gray-300 hover:text-primary transition-colors p-2">
+                            <a href="${tool.url}" target="_blank" rel="noopener noreferrer" title="새 탭에서 열기" class="text-gray-300 dark:text-gray-500 hover:text-primary dark:hover:text-primary transition-colors p-2">
                                 <i class="fa-solid fa-arrow-up-right-from-square"></i>
                             </a>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors">${tool.name}</h3>
-                        <p class="text-gray-600 text-sm mb-6 flex-grow leading-relaxed">${tool.desc}</p>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-primary dark:group-hover:text-indigo-400 transition-colors">${tool.name}</h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-6 flex-grow leading-relaxed">${tool.desc}</p>
                         <div class="flex flex-wrap gap-2 mb-6">
                             ${tagsHtml}
                         </div>
-                        <a href="${tool.url}" target="_blank" rel="noopener noreferrer" class="block w-full text-center py-3 px-4 bg-gray-50 hover:bg-primary hover:text-white text-gray-700 font-semibold rounded-xl transition-colors border border-gray-200 hover:border-transparent text-sm">
+                        <a href="${tool.url}" target="_blank" rel="noopener noreferrer" class="block w-full text-center py-3 px-4 bg-gray-50 dark:bg-gray-700/50 hover:bg-primary dark:hover:bg-primary hover:text-white text-gray-700 dark:text-gray-200 font-semibold rounded-xl transition-all border border-gray-200 dark:border-gray-600 hover:border-transparent text-sm">
                             사이트 바로가기
                         </a>
                     `;
@@ -206,18 +234,22 @@
             }
         }
 
+        // 활성화/비활성화 클래스 배열 정의 (다크모드 포함)
+        const activeClasses = ['bg-primary', 'text-white', 'shadow-md', 'shadow-indigo-200', 'dark:shadow-indigo-900/20', 'active'];
+        const inactiveClasses = ['bg-gray-50', 'text-gray-600', 'border', 'border-gray-200', 'hover:bg-gray-100', 'hover:text-gray-900', 'dark:bg-gray-800', 'dark:text-gray-300', 'dark:border-gray-700', 'dark:hover:bg-gray-700', 'dark:hover:text-white'];
+
         // 필터 버튼 클릭 이벤트 설정
         filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 // 기존 활성화 버튼 스타일 초기화
                 filterBtns.forEach(b => {
-                    b.classList.remove('bg-primary', 'text-white', 'shadow-md', 'shadow-indigo-200', 'active');
-                    b.classList.add('bg-gray-50', 'text-gray-600', 'border', 'border-gray-200');
+                    b.classList.remove(...activeClasses);
+                    b.classList.add(...inactiveClasses);
                 });
                 
                 // 클릭된 버튼 활성화 스타일 적용
-                btn.classList.remove('bg-gray-50', 'text-gray-600', 'border', 'border-gray-200');
-                btn.classList.add('bg-primary', 'text-white', 'shadow-md', 'shadow-indigo-200', 'active');
+                btn.classList.remove(...inactiveClasses);
+                btn.classList.add(...activeClasses);
 
                 // 데이터 렌더링
                 const filter = btn.getAttribute('data-filter');
